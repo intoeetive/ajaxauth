@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+  <title>AJAX Auth</title>
+
+  <style type="text/css" media="screen,print">@import url("docs.css");</style>
+<META http-equiv=Content-Type content="text/html; charset=utf-8"></head>
+
+<body>
+<div><a name="top"></a></div>
+
+<div id="header">
+<table cellpadding="0" cellspacing="0" border="0" style="width:100%;"><tr>
+<td class="docheading" style="width:300px;"><h1 style="font-size: 18px; font-weight: bold;">intoEEtive.com</h1></td>
+<td class="searchbox">
+
+</td>
+</tr>
+</table>
+</div>
+
+
+<div id="navlinks">
+<a href="http://www.intoeetive.com/">intoEEtive.com</a> &gt;
+<a href="http://www.intoeetive.com/index.php/category/extending_ee">EE add-ons</a> &gt;
+<a href="http://www.intoeetive.com/index.php/comments/ajax-login-for-expressionengine">AJAX Auth</a>
+</div>
+
+
+<div id="content">
+
+	<h1>AJAX Auth</h1>
+
+	<p>AJAX Auth module enables asynchronous (without refreshing the page) login and logout for ExpressionEngine 2.</p>
+    
+<p class="important">AJAX Auth relies on some files provided by Member module, so it will not work on Freelancer license of ExpressionEngine.
+ </p>     
+    	<ul>
+		
+        
+        <li><a href="#login">Login</a></li>
+        <li><a href="#logout">Logout</a></li>
+        <li><a href="#css">CSS guide</a></li>
+        <li><a href="#example">Example</a></li>
+
+	</ul>
+    
+<p class="important">Do not forget to include jQuery on all pages that contain ajax login &amp; logout functional.
+<code>&lt;script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js'&gt;&lt;/script&gt;</code>
+ </p>    
+ 
+	<h2><a name="login"></a>Login</h2>
+
+<p><strong>{exp:ajaxauth:login}...{exp:ajaxauth:logout}</strong>
+</p>
+<p>This tag pair will display AJAX login form. Inside can be placed any fields available for <a href="http://expressionengine.com/user_guide/modules/member/login_form.html">Member login form</a>. Username and password are mandatory, of course.</p>
+<p>Variables:
+<ul>
+<li><strong>{error_container}</strong> &mdash; will create a container that will display error message (if any). Place it whereever you want error messages to appear (it is hidden initially)</li>
+<li><strong>{loader}</strong>Please wait...<strong>{/loader}</strong> &mdash; will display 'loading' message when form is submitted. Replace the contents with appropriate image and/or text</li>
+</ul>
+</p>
+<p>Parameters:
+<ul>
+<li><strong>secure="yes"</strong> &mdash; optional parameter that will make the form send data over secure connection</li>
+<li><strong>name</strong> &mdash; form name. Defaults to 'ajaxauth_login'</li>
+<li><strong>id</strong> &mdash; form ID. Defaults to 'ajaxauth_login'</li>
+<li><strong>class</strong> &mdash; form class. Defaults to 'ajaxauth'</li>
+<li><strong>return</strong> &mdash; template which will be used to replace the form after successful login. If omited, the form will be replaced with text found in language/english/lang.ajaxauth.php</li>
+<li><strong>post_process</strong> &mdash; JavaScript function(s) that will be executed after successful login. Separate multiple functions with pipe, ex. post_process="function1|function2|function3"</li>
+
+</ul>
+</p>
+
+	<h2><a name="login"></a>Logout</h2>
+
+<p><strong>{exp:ajaxauth:logout}</strong>...{link}Log me out{/link}...<strong>{exp:ajaxauth:logout}</strong>
+</p>
+<p>This tag pair will display the block with AJAX logout link.</p>
+<p>Variables:
+<ul>
+<li><strong>{link}</strong>Log out<strong>{/link}</strong> &mdash; contains the actual clickable text/image that will be used as logout link. Mandatory.</li>
+<li><strong>{loader}</strong>Please wait...<strong>{/loader}</strong> &mdash; will display 'loading' message when form is submitted. Replace the contents with appropriate image and/or text</li>
+</ul>
+</p>
+<p>Parameters:
+<ul>
+<li><strong>secure="yes"</strong> &mdash; optional parameter that will send the data over secure connection</li>
+<li><strong>id</strong> &mdash; container block ID. Defaults to 'ajaxauth_logout'</li>
+<li><strong>class</strong> &mdash; container block  class. Defaults to 'ajaxauth'</li>
+<li><strong>return</strong> &mdash; template which will be used to replace the container block after successful logout. If omited, the container block will be replaced with text found in language/english/lang.ajaxauth.php</li>
+<li><strong>post_process</strong> &mdash; JavaScript function(s) that will be executed after successful logout. Separate multiple functions with pipe, ex. post_process="function1|function2|function3"</li>
+
+</ul>
+</p>
+
+	<h2><a name="css"></a>CSS guide</h2>
+
+<p>Following CSS classes and IDs are available:
+<ul>
+<li><strong>.ajaxauth</strong> &mdash; login form/outer container of logout block</li>
+<li><strong>#ajaxauth_login</strong> (or ID defined by id parameter of login tag) &mdash; login form</li>
+<li><strong>#ajaxauth_logout</strong> (or ID defined by id parameter of logout tag) &mdash; outer container of logout block</li>
+<li><strong>.ajaxauth_loader</strong> &mdash; block that displays 'loading' message during login/logout</li>
+<li><strong>#ajaxauth_login_loader</strong> &mdash; block that displays 'loading' message during login</li>
+<li><strong>#ajaxauth_logout_loader</strong> &mdash; block that displays 'loading' message during logout</li>
+<li><strong>#ajaxauth_login_error_container</strong> &mdash; block that will display login error messages. NOTE: login error message will be formatted like this: &lt;ul&gt;&lt;li&gt;message&lt;/li&gt;&lt;/ul&gt;</li>
+<li><strong>#ajaxauth_logout_link</strong> &mdash; &lt;a&gt; tag that will contain clickable logout text/image</li>
+
+</ul>
+</p>
+
+	<h2><a name="example"></a>Example</h2>
+
+<code>
+&lt;script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js'&gt;&lt;/script&gt;<br />
+<br />
+{if logged_out}<br />
+{exp:ajaxauth:login name="login_form" class="login_form" id="login_form" return="_includes/log-in-out"}<br />
+{error_container}<br />
+{loader}Loading...{/loader}<br />
+&lt;p&gt;&lt;label&gt;Username&lt;/label&gt;&lt;br /&gt;<br />
+&lt;input type="text" name="username" value="" maxlength="32" class="input" size="25" /&gt;&lt;/p&gt;<br />
+&lt;p&gt;&lt;label&gt;Password&lt;/label&gt;&lt;br /&gt;<br />
+&lt;input type="password" name="password" value="" maxlength="32" class="input" size="25" /&gt;&lt;/p&gt;<br />
+{if auto_login}<br />
+&lt;p&gt;&lt;input class='checkbox' type='checkbox' name='auto_login' value='1' /&gt; Auto-login on future visits&lt;/p&gt;<br />
+{/if}<br />
+&lt;p&gt;&lt;input class='checkbox' type='checkbox' name='anon' value='1' checked='checked' /&gt; Show my name in the online users list&lt;/p&gt;<br />
+&lt;p&gt;&lt;input type="submit" name="submit" value="Submit" /&gt;&lt;/p&gt;<br />
+&lt;p&gt;&lt;a href="{path='member/forgot_password'}"&gt;Forgot your password?&lt;/a&gt;&lt;/p&gt;<br />
+{/exp:ajaxauth:login}<br />
+{/if}<br />
+<br />
+{if logged_in}<br />
+{exp:ajaxauth:logout class="logout_form" id="logout_form" return="_includes/log-in-out" post_process="al"}<br />
+{loader}Loading...{/loader}<br />
+{link}Log me out!{/link}<br />
+{/exp:ajaxauth:logout}<br />
+&lt;script type="text/javascript"&gt;<br />
+function al(){<br />
+alert('You are logged out!');<br />
+}<br />
+&lt;/script&gt;<br />
+{/if}
+</code>
+
+</div>
+
+
+<p class="center"><a href="#top">Top of page</a></p>
+
+<!-- {user_guide_comments} -->
+
+<div id="footer">
+  <address>Copyright &copy; 2011 Yuriy Salimovskiy <a href="http://www.intoeetive.com/">intoEEtive.com</a></address>
+</div>
+
+</body>
+</html>
