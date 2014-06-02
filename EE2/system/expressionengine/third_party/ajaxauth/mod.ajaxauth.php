@@ -175,6 +175,10 @@ $(document).ready(function(){
         
         $act = $this->EE->db->query("SELECT action_id FROM exp_actions WHERE class='Ajaxauth' AND method='do_logout'");
         $data['action'] = ($this->EE->TMPL->fetch_param('secure')=='yes') ? str_replace('http:', 'https:', $this->EE->config->item('site_url')."?ACT=".$act->row('action_id')) : $this->EE->config->item('site_url')."?ACT=".$act->row('action_id');
+        if ($this->EE->config->item('app_version')>=280)
+        {
+            $data['action'] .= '&csrf_token='.CSRF_TOKEN;
+        }
         
         preg_match_all("/".LD."link".RD."(.*?)".LD."\/link".RD."/s", $tagdata, $link);
         $tagdata = str_replace($link[0][0], "<a href=\"".$data['action']."\" id=\"ajaxauth_logout_link\">".$link[1][0]."</a>", $tagdata);
