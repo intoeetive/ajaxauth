@@ -10,7 +10,7 @@ $lang = array(
 "AJAX Auth",
 
 "ajaxauth_module_description" =>
-"Enables AJAX login and logout (without refreshing the page)",
+"Enables AJAX login and logout",
 
 /* ----------------------------------------*/
 

@@ -6,16 +6,7 @@
 -----------------------------------------------------
  http://www.intoeetive.com/
 -----------------------------------------------------
- Copyright (c) 2011 Yuriy Salimovskiy
-=====================================================
- This software is based upon and derived from
- ExpressionEngine software protected under
- copyright dated 2004 - 2011. Please see
- http://expressionengine.com/docs/license.html
-=====================================================
- File: upd.ajaxauth.php
------------------------------------------------------
- Purpose: Enables AJAX login and logout (without refreshing the page)
+ Copyright (c) 2011-2016 Yuri Salimovskiy
 =====================================================
 */
 
@@ -36,11 +27,10 @@ class Ajaxauth {
 
     function __construct()
     {        
-    	$this->EE =& get_instance(); 
     	
-        $this->EE->lang->loadfile('member');
-        $this->EE->lang->loadfile('login');
-        $this->EE->lang->loadfile('ajaxauth');
+        ee()->lang->loadfile('member');
+        ee()->lang->loadfile('login');
+        ee()->lang->loadfile('ajaxauth');
     }
     /* END */
 
@@ -54,34 +44,34 @@ class Ajaxauth {
     function login()
     { 
 
-        if ($this->EE->session->userdata['member_id']!=0)
+        if (ee()->session->userdata['member_id']!=0)
         {
-            return $this->EE->TMPL->no_results();
+            return ee()->TMPL->no_results();
         }
         
-        $tagdata = $this->EE->TMPL->swap_var_single('error_container', '<div id="ajaxauth_login_error_container" style="display: none"></div>', $this->EE->TMPL->tagdata); 
+        $tagdata = ee()->TMPL->swap_var_single('error_container', '<div id="ajaxauth_login_error_container" style="display: none"></div>', ee()->TMPL->tagdata); 
         $has_loader = preg_match_all("/".LD."loader".RD."(.*?)".LD."\/loader".RD."/s", $tagdata, $loader);
         if ($has_loader > 0)
         {
             $tagdata = str_replace($loader[0][0], "<div id=\"ajaxauth_login_loader\" class=\"ajaxauth_loader\" style=\"display: none\">".$loader[1][0]."</div>", $tagdata);
         }
         
-        $act = $this->EE->db->query("SELECT action_id FROM exp_actions WHERE class='Ajaxauth' AND method='do_login'");
-        $data['action'] = ($this->EE->TMPL->fetch_param('secure')=='yes') ? str_replace('http:', 'https:', $this->EE->config->item('site_url')."?ACT=".$act->row('action_id')) : $this->EE->config->item('site_url')."?ACT=".$act->row('action_id');
+        $act = ee()->db->query("SELECT action_id FROM exp_actions WHERE class='Ajaxauth' AND method='do_login'");
+        $data['action'] = (ee()->TMPL->fetch_param('secure')=='yes') ? str_replace('http:', 'https:', ee()->config->item('site_url')."?ACT=".$act->row('action_id')) : ee()->config->item('site_url')."?ACT=".$act->row('action_id');
 
-        $data['hidden_fields']['ACT'] = $this->EE->functions->fetch_action_id('Ajaxauth', 'do_login');       
-        if ($this->EE->config->item('secure_forms') == 'y') { 
+        $data['hidden_fields']['ACT'] = ee()->functions->fetch_action_id('Ajaxauth', 'do_login');       
+        if (ee()->config->item('secure_forms') == 'y') { 
             $data['secure'] =TRUE; 
         }
         
-		$data['name']		= ($this->EE->TMPL->fetch_param('name')!='') ? $this->EE->TMPL->fetch_param('name') : 'ajaxauth_login';
-        $data['id']		= ($this->EE->TMPL->fetch_param('id')!='') ? $this->EE->TMPL->fetch_param('id') : 'ajaxauth_login';
-        $data['class']		= ($this->EE->TMPL->fetch_param('class')!='') ? $this->EE->TMPL->fetch_param('class') : 'ajaxauth';
+		$data['name']		= (ee()->TMPL->fetch_param('name')!='') ? ee()->TMPL->fetch_param('name') : 'ajaxauth_login';
+        $data['id']		= (ee()->TMPL->fetch_param('id')!='') ? ee()->TMPL->fetch_param('id') : 'ajaxauth_login';
+        $data['class']		= (ee()->TMPL->fetch_param('class')!='') ? ee()->TMPL->fetch_param('class') : 'ajaxauth';
         
-        $post_process_a = ($this->EE->TMPL->fetch_param('post_process')!='') ? explode("|", $this->EE->TMPL->fetch_param('post_process')) : array();
+        $post_process_a = (ee()->TMPL->fetch_param('post_process')!='') ? explode("|", ee()->TMPL->fetch_param('post_process')) : array();
 
         $cond = array();
-        if ($this->EE->config->item('user_session_type') != 'c')
+        if (ee()->config->item('user_session_type') != 'c')
 		{
 			$cond['auto_login'] = false;
 		}
@@ -89,15 +79,15 @@ class Ajaxauth {
 		{
 			$cond['auto_login'] = true;
 		}
-        $tagdata = $this->EE->functions->prep_conditionals($tagdata, $cond);
+        $tagdata = ee()->functions->prep_conditionals($tagdata, $cond);
         
-        $out = $this->EE->functions->form_declaration($data)."\n".
+        $out = ee()->functions->form_declaration($data)."\n".
                 $tagdata."\n".
                 "</form>";
                 
         $out .= "<script type=\"text/javascript\">
 $(document).ready(function(){
-    $('#".$data['id']."').live('submit', function(event){
+    $('#".$data['id']."').on('submit', function(event){
         event.preventDefault();
         $('#ajaxauth_login_error_container').hide();
         ";
@@ -116,21 +106,35 @@ $(document).ready(function(){
             $out .= "$('#ajaxauth_login_loader').hide();";
         }
         $out .= "
-                if (msg.indexOf('".$this->EE->lang->line('mbr_you_are_logged_in')."') >= 0)
+
+                var logged_in = false;
+                var is_json = false;
+                if (typeof(msg['success'])!='undefined')
                 {
-                    
+                    is_json = true;
+                    if (msg['success']==true)
+                    {
+                        logged_in = true;
+                    }
+                }
+                else if (msg.indexOf('".ee()->lang->line('mbr_you_are_logged_in')."') >= 0)
+                {
+                    logged_in  = true;
+                }
+                if (logged_in==true)
+                {
                 ";
-        if ($this->EE->TMPL->fetch_param('return')!='')
+        if (ee()->TMPL->fetch_param('return')!='')
         {
             $out .= "
-                    $.get('".$this->EE->functions->create_url($this->EE->TMPL->fetch_param('return'))."', 
+                    $.get('".ee()->functions->create_url(ee()->TMPL->fetch_param('return'))."', 
                     function(ret){
                         $('#".$data['id']."').replaceWith(ret);
                     });";
         }
         else
         {
-            $out .= "$('#".$data['id']."').replaceWith(\"".$this->EE->lang->line('logged_in')."\");";
+            $out .= "$('#".$data['id']."').replaceWith(\"".ee()->lang->line('logged_in')."\");";
         }
         foreach ($post_process_a as $post_process)
         {
@@ -141,7 +145,13 @@ $(document).ready(function(){
         $out .= "
                     
                 } else {
-                    var out = /<ul>[\s\S]*<\/ul>/.exec(msg);
+                    if (is_json==true)
+                    {
+                        var out = msg['content'];
+                    } else 
+                    {
+                        var out = /<ul>[\s\S]*<\/ul>/.exec(msg);
+                    }
                     $('#ajaxauth_login_error_container').html(''+out);
                     $('#ajaxauth_login_error_container').show();
                 }
@@ -161,21 +171,21 @@ $(document).ready(function(){
     function logout()
     { 
 
-        if ($this->EE->session->userdata['member_id']==0)
+        if (ee()->session->userdata['member_id']==0)
         {
-            return $this->EE->TMPL->no_results();
+            return ee()->TMPL->no_results();
         }
         
-        $tagdata = $this->EE->TMPL->tagdata;
+        $tagdata = ee()->TMPL->tagdata;
         $has_loader = preg_match_all("/".LD."loader".RD."(.*?)".LD."\/loader".RD."/s", $tagdata, $loader);
         if ($has_loader > 0)
         {
             $tagdata = str_replace($loader[0][0], "<div id=\"ajaxauth_logout_loader\" class=\"ajaxauth_loader\" style=\"display: none\">".$loader[1][0]."</div>", $tagdata);
         }
         
-        $act = $this->EE->db->query("SELECT action_id FROM exp_actions WHERE class='Ajaxauth' AND method='do_logout'");
-        $data['action'] = ($this->EE->TMPL->fetch_param('secure')=='yes') ? str_replace('http:', 'https:', $this->EE->config->item('site_url')."?ACT=".$act->row('action_id')) : $this->EE->config->item('site_url')."?ACT=".$act->row('action_id');
-        if ($this->EE->config->item('app_version')>=280)
+        $act = ee()->db->query("SELECT action_id FROM exp_actions WHERE class='Ajaxauth' AND method='do_logout'");
+        $data['action'] = (ee()->TMPL->fetch_param('secure')=='yes') ? str_replace('http:', 'https:', ee()->config->item('site_url')."?ACT=".$act->row('action_id')) : ee()->config->item('site_url')."?ACT=".$act->row('action_id');
+        if (version_compare(APP_VER, '2.8.0', '>='))
         {
             $data['action'] .= '&csrf_token='.CSRF_TOKEN;
         }
@@ -183,16 +193,16 @@ $(document).ready(function(){
         preg_match_all("/".LD."link".RD."(.*?)".LD."\/link".RD."/s", $tagdata, $link);
         $tagdata = str_replace($link[0][0], "<a href=\"".$data['action']."\" id=\"ajaxauth_logout_link\">".$link[1][0]."</a>", $tagdata);
         
-        $data['id']		= ($this->EE->TMPL->fetch_param('id')!='') ? $this->EE->TMPL->fetch_param('id') : 'ajaxauth_logout';
-        $data['class']		= ($this->EE->TMPL->fetch_param('class')!='') ? $this->EE->TMPL->fetch_param('class') : 'ajaxauth';
+        $data['id']		= (ee()->TMPL->fetch_param('id')!='') ? ee()->TMPL->fetch_param('id') : 'ajaxauth_logout';
+        $data['class']		= (ee()->TMPL->fetch_param('class')!='') ? ee()->TMPL->fetch_param('class') : 'ajaxauth';
         
-        $post_process_a = ($this->EE->TMPL->fetch_param('post_process')!='') ? explode("|", $this->EE->TMPL->fetch_param('post_process')) : array();
+        $post_process_a = (ee()->TMPL->fetch_param('post_process')!='') ? explode("|", ee()->TMPL->fetch_param('post_process')) : array();
   
         $out = "<div id=\"".$data['id']."\" class=\"".$data['class']."\">".$tagdata."</div>\n";
                 
         $out .= "<script type=\"text/javascript\">
 $(document).ready(function(){
-    $('#ajaxauth_logout_link').live('click', function(event){
+    $('#ajaxauth_logout_link').on('click', function(event){
         event.preventDefault();
         ";
         if ($has_loader > 0)
@@ -210,16 +220,16 @@ $(document).ready(function(){
         }
         $out .= "
                 ";
-        if ($this->EE->TMPL->fetch_param('return')!='')
+        if (ee()->TMPL->fetch_param('return')!='')
         {
-            $out .= "$.get('".$this->EE->functions->create_url($this->EE->TMPL->fetch_param('return'))."', 
+            $out .= "$.get('".ee()->functions->create_url(ee()->TMPL->fetch_param('return'))."', 
                     function(ret){
                         $('#".$data['id']."').replaceWith(ret);
                     });";
         }
         else
         {
-            $out .= "$('#".$data['id']."').replaceWith(\"".$this->EE->lang->line('logged_out')."\");";
+            $out .= "$('#".$data['id']."').replaceWith(\"".ee()->lang->line('logged_out')."\");";
         }
         foreach ($post_process_a as $post_process)
         {
