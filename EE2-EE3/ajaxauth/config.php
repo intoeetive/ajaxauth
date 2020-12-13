@@ -3,7 +3,7 @@
 if ( ! defined('AJAXAUTH_ADDON_NAME'))
 {
 	define('AJAXAUTH_ADDON_NAME',         'AJAX Auth');
-	define('AJAXAUTH_ADDON_VERSION',      '1.1.0');
+	define('AJAXAUTH_ADDON_VERSION',      '1.2.0');
 }
 
 $config['name']=AJAXAUTH_ADDON_NAME;
